@@ -13,6 +13,7 @@ menuconfig SPI_NOR
 	select FLASH_JESD216
 	select FLASH_HAS_EX_OP
 	select SPI
+	select PM_DEVICE_DRIVER_NEEDS_DEDICATED_WQ
 
 if SPI_NOR
 
