@@ -26,6 +26,7 @@
 #define TEST_AREA_DEV_NODE	DT_INST(0, jedec_nor)
 #define TEST_IS_DTR		DT_ENUM_HAS_VALUE(TEST_AREA_DEV_NODE, mspi_data_rate,              \
 						  mspi_data_rate_dual)
+#define TEST_AREA_DEV_NODE DT_INST(0, jedec_mspi_nor)
 #elif defined(CONFIG_FLASH_RENESAS_RA_QSPI)
 #define TEST_AREA_DEV_NODE DT_INST(0, renesas_ra_qspi_nor)
 #elif defined(CONFIG_FLASH_RENESAS_RZ_QSPI_XSPI)
@@ -54,7 +55,7 @@
 #if defined CONFIG_FLASH_RENESAS_RA_OSPI_B
 #define TEST_AREA_OFFSET	0x40000
 #else
-#define TEST_AREA_OFFSET	0xff000
+#define TEST_AREA_OFFSET	CONFIG_TEST_DRIVER_FLASH_TEST_AREA_OFFSET
 #endif
 
 #if DT_NODE_HAS_PROP(TEST_AREA_DEV_NODE, size_in_bytes)

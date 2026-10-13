@@ -24,4 +24,13 @@ config TEST_FORCE_STORAGE_PARTITION
 	  the storage area by default. Set this config to priorize
 	  testing the storage partition instead.
 
+config TEST_DRIVER_FLASH_TEST_AREA_OFFSET
+	hex "Offset of the test area in the flash device under test"
+	default 0xe0000 if SOC_SERIES_CC23X0 || SOC_SERIES_CC27XX
+	default 0xff000
+	help
+	  Offset used by the test when it runs directly on a flash device
+	  node instead of a partition. Lower it for devices where two
+	  pages starting at the default offset do not fit in the device.
+
 source "Kconfig.zephyr"
