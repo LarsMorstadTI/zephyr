@@ -1,0 +1,100 @@
+/*
+ * Copyright (c) 2026 Texas Instruments Incorporated
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/dts-v1/;
+
+#include <ti/cc2341r10.dtsi>
+#include "lp_em_cc2341r10-pinctrl.dtsi"
+#include <zephyr/dt-bindings/gpio/gpio.h>
+#include <zephyr/dt-bindings/input/input-event-codes.h>
+
+/ {
+	model = "TI CC2341R10 LaunchPad";
+	compatible = "ti,lp_em_cc2341r10";
+
+	chosen {
+		zephyr,sram = &sram0;
+		zephyr,flash = &flash0;
+		zephyr,code-partition = &slot0_partition;
+		zephyr,console = &uart0;
+		zephyr,shell-uart = &uart0;
+	};
+
+	aliases {
+		led0 = &led0;
+		led1 = &led1;
+		sw0 = &btn0;
+		sw1 = &btn1;
+		watchdog0 = &wdt0;
+		rtc = &rtc0;
+	};
+
+	leds {
+		compatible = "gpio-leds";
+
+		led0: led_0 {
+			gpios = <&gpio0 7 GPIO_ACTIVE_HIGH>;
+			label = "Green LED";
+		};
+
+		led1: led_1 {
+			gpios = <&gpio0 14 GPIO_ACTIVE_HIGH>;
+			label = "Red LED";
+		};
+	};
+
+	keys {
+		compatible = "gpio-keys";
+
+		btn0: btn_0 {
+			gpios = <&gpio0 23 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+			label = "Button 1";
+			zephyr,code = <INPUT_KEY_0>;
+		};
+
+		btn1: btn_1 {
+			gpios = <&gpio0 19 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+			label = "Button 2";
+			zephyr,code = <INPUT_KEY_1>;
+		};
+	};
+};
+
+&cpu0 {
+	clock-frequency = <48000000>;
+};
+
+&uart0 {
+	status = "okay";
+	current-speed = <115200>;
+	pinctrl-0 = <&uart0_rx_default &uart0_tx_default>;
+	pinctrl-names = "default";
+};
+
+&spi0 {
+	status = "okay";
+	pinctrl-0 = <&spi0_sck_default &spi0_pico_default &spi0_poci_default &spi0_cs_default>;
+	pinctrl-names = "default";
+	cs-gpios = <&gpio0 11 GPIO_ACTIVE_LOW>;
+};
+
+&i2c0 {
+	status = "okay";
+	pinctrl-0 = <&i2c0_scl_default &i2c0_sda_default>;
+	pinctrl-names = "default";
+	clock-frequency = <100000>;
+};
+
+&lgpt0 {
+	clk-prescale = <32>;
+	status = "okay";
+};
+
+&adc0 {
+	status = "okay";
+	pinctrl-0 = <&adc0_ch0 &adc0_ch2>;
+	pinctrl-names = "default";
+};
