@@ -16,6 +16,18 @@
 
 #include <driverlib/clkctl.h>
 #include <inc/hw_lgpt.h>
+
+/* CC23X1's CLKCTLEnable/Disable take only the peripheral argument, not the
+ * base address. Provide a compatibility wrapper so the Zephyr drivers can use
+ * the same call pattern as on CC23X0 and CC27XX.
+ */
+#if defined(CONFIG_SOC_SERIES_CC23X1)
+#define CLKCTL_ENABLE(base, periph)  CLKCTLEnable(periph)
+#define CLKCTL_DISABLE(base, periph) CLKCTLDisable(periph)
+#else
+#define CLKCTL_ENABLE(base, periph)  CLKCTLEnable(base, periph)
+#define CLKCTL_DISABLE(base, periph) CLKCTLDisable(base, periph)
+#endif
 #include <inc/hw_lgpt1.h>
 #include <inc/hw_lgpt3.h>
 #include <inc/hw_types.h>
@@ -390,10 +402,10 @@ static int lgpt_lpf3_pm_action(const struct device *dev, enum pm_device_action a
 
 	switch (action) {
 	case PM_DEVICE_ACTION_SUSPEND:
-		CLKCTLDisable(CLKCTL_BASE, config->clk_idx);
+		CLKCTL_DISABLE(CLKCTL_BASE, config->clk_idx);
 		return 0;
 	case PM_DEVICE_ACTION_RESUME:
-		CLKCTLEnable(CLKCTL_BASE, config->clk_idx);
+		CLKCTL_ENABLE(CLKCTL_BASE, config->clk_idx);
 		counter_lgpt_lpf3_init_common(dev);
 		return 0;
 	default:
@@ -416,14 +428,14 @@ static DEVICE_API(counter, lgpt_lpf3_api) = {
 };
 
 #define LGPT_LPF3_INIT_FUNC(inst)                                                                  \
-	static int counter_lgpt_lpf3_init_##inst(const struct device *dev)                        \
+	static int counter_lgpt_lpf3_init_##inst(const struct device *dev)                         \
 	{                                                                                          \
-		const struct counter_lgpt_lpf3_config *config = dev->config;                      \
+		const struct counter_lgpt_lpf3_config *config = dev->config;                       \
                                                                                                    \
-		CLKCTLEnable(CLKCTL_BASE, config->clk_idx);                                        \
+		CLKCTL_ENABLE(CLKCTL_BASE, config->clk_idx);                                       \
                                                                                                    \
-		IRQ_CONNECT(DT_INST_IRQN(inst), DT_INST_IRQ(inst, priority),                      \
-			    counter_lgpt_lpf3_isr, DEVICE_DT_INST_GET(inst), 0);                  \
+		IRQ_CONNECT(DT_INST_IRQN(inst), DT_INST_IRQ(inst, priority),                       \
+			    counter_lgpt_lpf3_isr, DEVICE_DT_INST_GET(inst), 0);                   \
                                                                                                    \
 		irq_enable(DT_INST_IRQN(inst));                                                    \
                                                                                                    \
