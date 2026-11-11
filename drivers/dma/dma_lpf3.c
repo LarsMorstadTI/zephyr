@@ -27,6 +27,18 @@ LOG_MODULE_REGISTER(dma_lpf3, CONFIG_DMA_LOG_LEVEL);
 #include <driverlib/udma.h>
 #include <driverlib/evtsvt.h>
 
+/* CC23X1's CLKCTLEnable/Disable take only the peripheral argument, not the
+ * base address. Provide a compatibility wrapper so the Zephyr drivers can use
+ * the same call pattern as on CC23X0 and CC27XX.
+ */
+#if defined(CONFIG_SOC_SERIES_CC23X1)
+#define CLKCTL_ENABLE(base, periph)  CLKCTLEnable(periph)
+#define CLKCTL_DISABLE(base, periph) CLKCTLDisable(periph)
+#else
+#define CLKCTL_ENABLE(base, periph)  CLKCTLEnable(base, periph)
+#define CLKCTL_DISABLE(base, periph) CLKCTLDisable(base, periph)
+#endif
+
 #include <inc/hw_evtsvt.h>
 #include <inc/hw_memmap.h>
 #include <inc/hw_types.h>
@@ -49,7 +61,7 @@ LOG_MODULE_REGISTER(dma_lpf3, CONFIG_DMA_LOG_LEVEL);
  * For CC27XX: DCH channels 0-7, ECH channels 8-11.
  */
 
-#if CONFIG_SOC_SERIES_CC27XX
+#if CONFIG_SOC_SERIES_CC27XX || CONFIG_SOC_SERIES_CC23X1
 #define DMA_LPF3_PERIPH_CH_MAX 7
 #define DMA_LPF3_ECH_CH_MIN    8
 #define DMA_LPF3_ECH_CH_MAX    11
@@ -79,11 +91,11 @@ LOG_MODULE_REGISTER(dma_lpf3, CONFIG_DMA_LOG_LEVEL);
 #endif
 
 static const uint32_t dma_lpf3_evtsvt_offsets[] = {
-#if CONFIG_SOC_SERIES_CC23X0 || CONFIG_SOC_SERIES_CC27XX
+#if CONFIG_SOC_SERIES_CC23X0 || CONFIG_SOC_SERIES_CC23X1 || CONFIG_SOC_SERIES_CC27XX
 	EVTSVT_O_DMACH0SEL, EVTSVT_O_DMACH1SEL, EVTSVT_O_DMACH2SEL,  EVTSVT_O_DMACH3SEL,
 	EVTSVT_O_DMACH4SEL, EVTSVT_O_DMACH5SEL, EVTSVT_O_DMACH6SEL,  EVTSVT_O_DMACH7SEL,
 #endif
-#if CONFIG_SOC_SERIES_CC27XX
+#if CONFIG_SOC_SERIES_CC23X1 || CONFIG_SOC_SERIES_CC27XX
 	EVTSVT_O_DMACH8SEL, EVTSVT_O_DMACH9SEL, EVTSVT_O_DMACH10SEL, EVTSVT_O_DMACH11SEL,
 #endif
 };
@@ -510,7 +522,7 @@ static bool dma_lpf3_chan_filter(const struct device *dev, int channel, void *fi
 
 static int dma_lpf3_enable(struct dma_lpf3_data *data)
 {
-	CLKCTLEnable(CLKCTL_BASE, CLKCTL_DMA);
+	CLKCTL_ENABLE(CLKCTL_BASE, CLKCTL_DMA);
 	uDMAEnable();
 	/* Set base address for channel control table (descriptors) */
 	uDMASetControlBase(data->desc);
@@ -558,7 +570,7 @@ static int dma_lpf3_pm_action(const struct device *dev, enum pm_device_action ac
 		}
 
 		uDMADisable();
-		CLKCTLDisable(CLKCTL_BASE, CLKCTL_DMA);
+		CLKCTL_DISABLE(CLKCTL_BASE, CLKCTL_DMA);
 
 		return 0;
 	case PM_DEVICE_ACTION_RESUME:
