@@ -24,6 +24,18 @@ LOG_MODULE_REGISTER(crypto_cc23xx_cc27xx, CONFIG_CRYPTO_LOG_LEVEL);
 #include <driverlib/aes.h>
 #include <driverlib/clkctl.h>
 
+/* CC23X1's CLKCTLEnable/Disable take only the peripheral argument, not the
+ * base address. Provide a compatibility wrapper so the Zephyr drivers can use
+ * the same call pattern as on CC23X0 and CC27XX.
+ */
+#if defined(CONFIG_SOC_SERIES_CC23X1)
+#define CLKCTL_ENABLE(base, periph)  CLKCTLEnable(periph)
+#define CLKCTL_DISABLE(base, periph) CLKCTLDisable(periph)
+#else
+#define CLKCTL_ENABLE(base, periph)  CLKCTLEnable(base, periph)
+#define CLKCTL_DISABLE(base, periph) CLKCTLDisable(base, periph)
+#endif
+
 #include <inc/hw_memmap.h>
 
 #define CRYPTO_CC23_CC27_CAP (CAP_RAW_KEY | CAP_SEPARATE_IO_BUFS | CAP_SYNC_OPS | CAP_NO_IV_PREFIX)
@@ -1148,7 +1160,7 @@ static int crypto_cc23xx_cc27xx_init(const struct device *dev)
 		    DEVICE_DT_INST_GET(0), 0);
 	irq_enable(DT_INST_IRQN(0));
 
-	CLKCTLEnable(CLKCTL_BASE, CLKCTL_LAES);
+	CLKCTL_ENABLE(CLKCTL_BASE, CLKCTL_LAES);
 
 	k_mutex_init(&data->device_mutex);
 	k_sem_init(&data->op_done, 0, 1);
@@ -1184,10 +1196,10 @@ static int crypto_cc23xx_cc27xx_pm_action(const struct device *dev, enum pm_devi
 
 	switch (action) {
 	case PM_DEVICE_ACTION_SUSPEND:
-		CLKCTLDisable(CLKCTL_BASE, CLKCTL_LAES);
+		CLKCTL_DISABLE(CLKCTL_BASE, CLKCTL_LAES);
 		break;
 	case PM_DEVICE_ACTION_RESUME:
-		CLKCTLEnable(CLKCTL_BASE, CLKCTL_LAES);
+		CLKCTL_ENABLE(CLKCTL_BASE, CLKCTL_LAES);
 		break;
 	case PM_DEVICE_ACTION_TURN_ON:
 	case PM_DEVICE_ACTION_TURN_OFF:
