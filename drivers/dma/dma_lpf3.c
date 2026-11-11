@@ -57,7 +57,8 @@ LOG_MODULE_REGISTER(dma_lpf3, CONFIG_DMA_LOG_LEVEL);
  * Both channel types support any transfer direction (M2M, M2P, P2M). The
  * direction is determined by how the source/destination addresses are set up.
  *
- * For CC23XX: DCH channels 0-5, ECH channels 6-7.
+ * For CC23X0: DCH channels 0-5, ECH channels 6-7.
+ * For CC23X1: DCH channels 0-7, ECH channels 8-11.
  * For CC27XX: DCH channels 0-7, ECH channels 8-11.
  */
 
@@ -85,10 +86,10 @@ LOG_MODULE_REGISTER(dma_lpf3, CONFIG_DMA_LOG_LEVEL);
 #define DMA_LPF3_NUM_CHANNELS  (DMA_LPF3_ECH_CH_MAX + 1)
 
 /*
- * Only valid for DCH channels (0-5 on CC23X0, 0-7 on CC27XX). On CC27XX, the
- * EVTSVT registers for ECH channels 8-11 are not sequential (CH10 and CH11
- * precede CH8 and CH9 in the address map), so this formula must not be used
- * for ECH channels.
+ * Only valid for DCH channels (0-5 on CC23X0, 0-7 on CC23X1 and CC27XX). On
+ * CC23X1 and CC27XX, the EVTSVT registers for ECH channels 8-11 are not
+ * sequential (CH10 and CH11 precede CH8 and CH9 in the address map), so this
+ * formula must not be used for ECH channels.
  */
 #define DMA_LPF3_CHXSEL_REG(ch) HWREG(EVTSVT_BASE + EVTSVT_O_DMACH0SEL + sizeof(uint32_t) * (ch))
 
