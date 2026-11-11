@@ -20,6 +20,18 @@
 #include <inc/hw_ioc.h>
 #include <inc/hw_types.h>
 
+/* CC23X1's CLKCTLEnable/Disable take only the peripheral argument, not the
+ * base address. Provide a compatibility wrapper so the Zephyr drivers can use
+ * the same call pattern as on CC23X0 and CC27XX.
+ */
+#if defined(CONFIG_SOC_SERIES_CC23X1)
+#define CLKCTL_ENABLE(base, periph)  CLKCTLEnable(periph)
+#define CLKCTL_DISABLE(base, periph) CLKCTLDisable(periph)
+#else
+#define CLKCTL_ENABLE(base, periph)  CLKCTLEnable(base, periph)
+#define CLKCTL_DISABLE(base, periph) CLKCTLDisable(base, periph)
+#endif
+
 #define IOC_ADDR(index)       (IOC_BASE + IOC_O_IOC0 + (sizeof(uint32_t) * (index)))
 #define IOC_PORTCFG_MASK      IOC_IOC0_PORTCFG_M
 #define GPIO_PIN_TO_MASK(pin) (1 << (pin))
@@ -284,7 +296,7 @@ static int gpio_cc23x0_pm_action(const struct device *dev, enum pm_device_action
 static int gpio_cc23x0_init(const struct device *dev)
 {
 	/* Enable GPIO domain clock */
-	CLKCTLEnable(CLKCTL_BASE, CLKCTL_GPIO);
+	CLKCTL_ENABLE(CLKCTL_BASE, CLKCTL_GPIO);
 
 	/* Enable IRQ */
 	IRQ_CONNECT(DT_INST_IRQN(0), DT_INST_IRQ(0, priority), gpio_cc23x0_isr,
