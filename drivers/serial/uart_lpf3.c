@@ -28,6 +28,18 @@
 #include <driverlib/uart.h>
 #include <driverlib/clkctl.h>
 
+/* CC23X1's CLKCTLEnable/Disable take only the peripheral argument, not the
+ * base address. Provide a compatibility wrapper so the Zephyr drivers can use
+ * the same call pattern as on CC23X0 and CC27XX.
+ */
+#if defined(CONFIG_SOC_SERIES_CC23X1)
+#define CLKCTL_ENABLE(base, periph)  CLKCTLEnable(periph)
+#define CLKCTL_DISABLE(base, periph) CLKCTLDisable(periph)
+#else
+#define CLKCTL_ENABLE(base, periph)  CLKCTLEnable(base, periph)
+#define CLKCTL_DISABLE(base, periph) CLKCTLDisable(base, periph)
+#endif
+
 #include <inc/hw_memmap.h>
 
 #ifdef CONFIG_UART_LPF3_DMA_DRIVEN
@@ -979,7 +991,7 @@ static int uart_lpf3_init_common(const struct device *dev)
 	const struct uart_lpf3_config *config = dev->config;
 	struct uart_lpf3_data *data = dev->data;
 
-	CLKCTLEnable(CLKCTL_BASE, config->clkctl_id);
+	CLKCTL_ENABLE(CLKCTL_BASE, config->clkctl_id);
 
 #ifdef CONFIG_UART_LPF3_DMA_DRIVEN
 	if (!device_is_ready(config->dma_dev)) {
@@ -1033,7 +1045,7 @@ static int uart_lpf3_pm_action(const struct device *dev, enum pm_device_action a
 	switch (action) {
 	case PM_DEVICE_ACTION_SUSPEND:
 		UARTDisable(config->reg);
-		CLKCTLDisable(CLKCTL_BASE, config->clkctl_id);
+		CLKCTL_DISABLE(CLKCTL_BASE, config->clkctl_id);
 		return 0;
 	case PM_DEVICE_ACTION_RESUME:
 		return uart_lpf3_init_common(dev);
