@@ -15,22 +15,11 @@
 #include <zephyr/pm/device.h>
 
 #include <driverlib/clkctl.h>
+#include <soc.h>
 #include <driverlib/gpio.h>
 #include <driverlib/ioc.h>
 #include <inc/hw_ioc.h>
 #include <inc/hw_types.h>
-
-/* CC23X1's CLKCTLEnable/Disable take only the peripheral argument, not the
- * base address. Provide a compatibility wrapper so the Zephyr drivers can use
- * the same call pattern as on CC23X0 and CC27XX.
- */
-#if defined(CONFIG_SOC_SERIES_CC23X1)
-#define CLKCTL_ENABLE(base, periph)  CLKCTLEnable(periph)
-#define CLKCTL_DISABLE(base, periph) CLKCTLDisable(periph)
-#else
-#define CLKCTL_ENABLE(base, periph)  CLKCTLEnable(base, periph)
-#define CLKCTL_DISABLE(base, periph) CLKCTLDisable(base, periph)
-#endif
 
 #define IOC_ADDR(index)       (IOC_BASE + IOC_O_IOC0 + (sizeof(uint32_t) * (index)))
 #define IOC_PORTCFG_MASK      IOC_IOC0_PORTCFG_M
