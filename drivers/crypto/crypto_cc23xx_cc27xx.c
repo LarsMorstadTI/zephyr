@@ -23,18 +23,7 @@ LOG_MODULE_REGISTER(crypto_cc23xx_cc27xx, CONFIG_CRYPTO_LOG_LEVEL);
 
 #include <driverlib/aes.h>
 #include <driverlib/clkctl.h>
-
-/* CC23X1's CLKCTLEnable/Disable take only the peripheral argument, not the
- * base address. Provide a compatibility wrapper so the Zephyr drivers can use
- * the same call pattern as on CC23X0 and CC27XX.
- */
-#if defined(CONFIG_SOC_SERIES_CC23X1)
-#define CLKCTL_ENABLE(base, periph)  CLKCTLEnable(periph)
-#define CLKCTL_DISABLE(base, periph) CLKCTLDisable(periph)
-#else
-#define CLKCTL_ENABLE(base, periph)  CLKCTLEnable(base, periph)
-#define CLKCTL_DISABLE(base, periph) CLKCTLDisable(base, periph)
-#endif
+#include <soc.h>
 
 #include <inc/hw_memmap.h>
 
