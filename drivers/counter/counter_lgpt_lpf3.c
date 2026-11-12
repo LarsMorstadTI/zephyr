@@ -15,19 +15,8 @@
 #include <zephyr/pm/policy.h>
 
 #include <driverlib/clkctl.h>
+#include <soc.h>
 #include <inc/hw_lgpt.h>
-
-/* CC23X1's CLKCTLEnable/Disable take only the peripheral argument, not the
- * base address. Provide a compatibility wrapper so the Zephyr drivers can use
- * the same call pattern as on CC23X0 and CC27XX.
- */
-#if defined(CONFIG_SOC_SERIES_CC23X1)
-#define CLKCTL_ENABLE(base, periph)  CLKCTLEnable(periph)
-#define CLKCTL_DISABLE(base, periph) CLKCTLDisable(periph)
-#else
-#define CLKCTL_ENABLE(base, periph)  CLKCTLEnable(base, periph)
-#define CLKCTL_DISABLE(base, periph) CLKCTLDisable(base, periph)
-#endif
 #include <inc/hw_lgpt1.h>
 #include <inc/hw_lgpt3.h>
 #include <inc/hw_types.h>
