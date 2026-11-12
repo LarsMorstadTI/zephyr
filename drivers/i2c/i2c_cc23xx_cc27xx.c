@@ -21,19 +21,8 @@
 LOG_MODULE_REGISTER(i2c_cc23xx_cc27xx);
 
 #include <driverlib/clkctl.h>
+#include <soc.h>
 #include <driverlib/i2c.h>
-
-/* CC23X1's CLKCTLEnable/Disable take only the peripheral argument, not the
- * base address. Provide a compatibility wrapper so the Zephyr drivers can use
- * the same call pattern as on CC23X0 and CC27XX.
- */
-#if defined(CONFIG_SOC_SERIES_CC23X1)
-#define CLKCTL_ENABLE(base, periph)  CLKCTLEnable(periph)
-#define CLKCTL_DISABLE(base, periph) CLKCTLDisable(periph)
-#else
-#define CLKCTL_ENABLE(base, periph)  CLKCTLEnable(base, periph)
-#define CLKCTL_DISABLE(base, periph) CLKCTLDisable(base, periph)
-#endif
 
 #include "i2c-priv.h"
 
