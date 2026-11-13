@@ -4,13 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-/ {
-	aliases {
-		gpio0 = &gpio0;
-	};
-};
-
-/* GPIO hogs for LED0 (DIO7) and LED1 (DIO14) */
-&gpio0 {
-	status = "okay";
+&led0 {
+    gpios = <&gpio0 2 GPIO_ACTIVE_HIGH>;
 };
