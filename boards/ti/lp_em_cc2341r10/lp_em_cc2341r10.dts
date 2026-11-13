@@ -80,9 +80,33 @@
 
 &spi0 {
 	status = "okay";
-	pinctrl-0 = <&spi0_sck_default &spi0_pico_default &spi0_poci_default &spi0_cs_default>;
-	pinctrl-names = "default";
-	cs-gpios = <&gpio0 11 GPIO_ACTIVE_LOW>;
+	pinctrl-0 = <&spi0_sck_default
+		     &spi0_pico_default
+		     &spi0_poci_default
+		     &spi0_cs_default>;
+	pinctrl-1 = <&spi0_sck_sleep
+		     &spi0_pico_sleep
+		     &spi0_poci_sleep
+		     &spi0_cs_sleep>;
+	pinctrl-names = "default", "sleep";
+	cs-gpios = <&gpio0 6 GPIO_ACTIVE_LOW>;
+
+	mx25r80: mx25r8035f@0 {
+		status = "okay";
+		compatible = "jedec,spi-nor";
+		reg = <0>;
+		zephyr,pm-device-runtime-auto;
+		spi-max-frequency = <12000000>;
+		size = <0x800000>;
+		jedec-id = [c2 28 14];
+		has-dpd;
+		dpd-wakeup-sequence = <30000 20 35000>;
+		t-enter-dpd = <10000>;
+		sfdp-bfp = [e5 20 f1 ff ff ff 7f 00 44 eb 08 6b 08 3b 04 bb
+			    ee ff ff ff ff ff 00 ff ff ff 00 ff 0c 20 0f 52
+			    10 d8 00 ff 23 72 f5 00 82 ed 04 b7 44 83 38 44
+			    30 b0 30 b0 f7 c4 d5 5c 00 be 29 ff f0 d0 ff ff];
+	};
 };
 
 &i2c0 {
@@ -100,5 +124,22 @@
 &adc0 {
 	status = "okay";
 	pinctrl-0 = <&adc0_ch0 &adc0_ch2>;
+	pinctrl-names = "default";
+};
+
+&comparator {
+	status = "okay";
+	pinctrl-0 = <&lpcmp_pos0_default &lpcmp_out0_default>;
+	pinctrl-names = "default";
+	positive-mux-input = "VA_PAD_A1";
+	negative-mux-input = "VDDD";
+	input-division-factor = "VIN_1_2";
+	division-input = "DIVISION_INPUT_NEGATIVE";
+	enable-output-pin;
+};
+
+&pwm0 {
+	status = "okay";
+	pinctrl-0 = <&pwm0_default>;
 	pinctrl-names = "default";
 };
